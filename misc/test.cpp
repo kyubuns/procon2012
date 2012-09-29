@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
   cv::Mat src_img = cv::imread("img/sample.jpg", 1);
-  if(!src_img.data) return -1; 
+  if(!src_img.data) return -1;
 
   cv::Mat gray_img, bin_img;
   cv::cvtColor(src_img, gray_img, CV_BGR2GRAY);
