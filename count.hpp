@@ -50,10 +50,15 @@ public:
     std::cout << "small : " << raito[small] << std::endl;
     std::cout << "medium: " << raito[medium]<< std::endl;
     std::cout << "large : " << raito[large] << std::endl;
-    std::cout << "---" << std::endl;
-    std::cout << "small : " << static_cast<int>(raito[small]*(total_weight/raito_total)+0.5) << std::endl;
-    std::cout << "medium: " << static_cast<int>(raito[medium]*(total_weight/raito_total)+0.5) << std::endl;
-    std::cout << "large : " << static_cast<int>(raito[large]*(total_weight/raito_total)+0.5) << std::endl;
+    int s = static_cast<int>(raito[small]*(total_weight/raito_total)+0.5) ;
+    int m = static_cast<int>(raito[medium]*(total_weight/raito_total)+0.5);
+    int l = static_cast<int>(raito[large]*(total_weight/raito_total)+0.5) ;
+    double t = s * weight[small] + m * weight[medium] + l * weight[large];
+    std::cout << "---result---" << std::endl;
+    std::cout << "small:  " << s << std::endl;
+    std::cout << "medium: " << m << std::endl;
+    std::cout << "large:  " << l << std::endl;
+    std::cout << "  total:" << t << "g" << std::endl;
     std::cout << "===" << std::endl;
 
     return 0;
