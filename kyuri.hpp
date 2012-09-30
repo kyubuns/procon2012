@@ -20,12 +20,14 @@
 
 class kyuri {
 public:
-  static void main(cv::Mat src_img_, cv::Mat canny_img) {
+  static void main(cv::Mat src_img_, cv::Mat canny_img, double total_weight) {
     if(canny_img.channels() != 1) throw std::runtime_error("kyuri: channels() != 1");
     cv::Mat src_img = src_img_.clone();
 
     std::vector<std::vector<cv::Point> > contours;
     cv::findContours(canny_img, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+    cv::namedWindow("bef", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
+    cv::imshow("bef", canny_img);
     CannyFix(canny_img);
     /*for(int i = 0; i < contours.size(); ++i) {
       size_t count = contours[i].size();
@@ -77,7 +79,6 @@ public:
     //std::cout << dx << " " << dy << " " << " " << loopCounter << " [" << edgeData.channels() << std::endl;
     std::vector< std::vector<cv::Point> > vp = clustering(canny_img,middles,radiuses);
 
-    std::cout << vp.size() << std::endl;
     cv::namedWindow("Canny", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
     cv::imshow("Canny", canny_img);
 
@@ -93,7 +94,7 @@ public:
       }
     }
     cv::imshow("fit ellipse", src_img);
-    count::main(vp, 120);
+    count::main(vp, total_weight);
     cv::waitKey(0);
   }
 
