@@ -5,10 +5,10 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "kyuri.hpp"
+#include "bgerase.hpp"
 
 //設定
 int const max_thresh=255;
-cv::Mat src_img;
 cv::Mat gray_img;
 cv::RNG rng(255);
 
@@ -75,9 +75,11 @@ int main(int argc,char** argv) {
       Scalar color=Scalar(255, 255, 255);
       drawContours(draw_img,contours,i,color,1,8,hierarchy,0,Point());
     }
-    kyuri::main(src_img, draw_img, 100.0);
+    kyuri::main(src_img, draw_img, erasebg_img, 100.0);
   });
   setTrackbarPos("Canny thresh", "Contours", 100);
+
+  erase_main();
 
   waitKey();
   return 0;

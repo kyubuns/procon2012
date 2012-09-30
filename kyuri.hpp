@@ -17,10 +17,11 @@
 #include <ctime>
 #include <cassert>
 #define ___ROUND(x) ((int)(x+0.5))
+#define GetMatIdx(img,y,x) (y*img.cols*img.channels()+x*img.channels())
 
 class kyuri {
 public:
-  static void main(cv::Mat src_img_, cv::Mat canny_img, double total_weight) {
+  static void main(cv::Mat src_img_, cv::Mat canny_img, cv::Mat erasebg_img, double total_weight) {
     if(canny_img.channels() != 1) throw std::runtime_error("kyuri: channels() != 1");
     cv::Mat src_img = src_img_.clone();
 
@@ -58,6 +59,13 @@ public:
       }
       x /= contours[i].size();
       y /= contours[i].size();
+
+      //背景か確認
+      int index = GetMatIdx(erasebg_img, static_cast<int>(y), static_cast<int>(x));
+      int b = static_cast<int>(erasebg_img.data[index]);
+      int g = static_cast<int>(erasebg_img.data[index+1]);
+      int r = static_cast<int>(erasebg_img.data[index+2]);
+      if(b==255 && g==0 && r==0) continue;
 
       double rad = 0;
       for(int j = 0 ; j < contours[i].size() ; j++){
