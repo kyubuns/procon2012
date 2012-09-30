@@ -62,7 +62,7 @@ public:
 
       //背景か確認
       int index = GetMatIdx(erasebg_img, static_cast<int>(y), static_cast<int>(x));
-      if(index<0 || index>=erasebg_img.cols*erasebg_img.rows*erasebg_img.channels()) continue;
+      if(index<0 || index+2>=erasebg_img.cols*erasebg_img.rows*erasebg_img.channels()) continue;
       int b = static_cast<int>(erasebg_img.data[index]);
       int g = static_cast<int>(erasebg_img.data[index+1]);
       int r = static_cast<int>(erasebg_img.data[index+2]);
