@@ -20,6 +20,67 @@ int blur_size,AcDif;
 int const max_blur=20,max_diff=20;
 
 
+#define haveColor(src,i) (src.data[i+0]>0||src.data[i+1]>0||src.data[i+2]>0)
+void bigFix(cv::Mat &src){
+    
+	const int dx[] = {-1,0,1,-1,1,-1,0,1,0};
+	const int dy[] = {-1,-1,-1,0,0,1,1,1,0};
+	cv::Mat cpy = src.clone();
+    int step = src.channels() * src.cols;
+    int ch = src.channels();
+    cout << ch << endl;
+	for(int i = 0 ; i < src.rows ; i++){
+		for(int j = 0 ; j < src.cols ; j++){
+			if( haveColor(src,i*step+j*ch) ){
+				vector<int> u;
+				queue<int> Q;
+				Q.push(i*step+ch*j);
+				src.data[i*step+ch*j+0] = 0;
+                src.data[i*step+ch*j+1] = 0;
+                src.data[i*step+ch*j+2] = 0;
+                
+				while(Q.size()){
+					int q = Q.front(); Q.pop();
+					int y = q / step;
+					int x = q % step / 3;
+					//cout << x << "," << y << " " << src.cols << " " << src.rows << endl;
+					u.push_back(q);
+					for(int d = 0 ; d < 8 ; d++){
+						int tx = x + dx[d];
+						int ty = y + dy[d];
+						if( tx >= 0 && tx < src.cols && ty >= 0 && ty < src.rows && haveColor(src,ty*step+tx*ch) ){
+							src.data[ty*step+tx*ch+0] = 0;
+							src.data[ty*step+tx*ch+1] = 0;
+							src.data[ty*step+tx*ch+2] = 0;
+                            Q.push(ty*src.step+tx*ch);
+						}
+					}
+				}
+				//cout << u.size() << endl;
+				if( u.size() < 100 ){
+					
+					for(int k = 0 ; k < u.size() ; k++){
+						int y = u[k] / step;
+						int x = u[k] % step / 3;
+						for(int d = 0 ; d < 9 ; d++){
+							int tx = x + dx[d];
+							int ty = y + dy[d];
+                            if( tx >= 0 && tx < src.cols && ty >= 0 && ty < src.rows ){
+                                cpy.data[ ty * step + tx*ch+0 ] = 0;
+                                cpy.data[ ty * step + tx*ch+1 ] = 0;
+                                cpy.data[ ty * step + tx*ch+2 ] = 0;
+                            }
+
+						}
+					}
+				}
+			}
+            
+		}
+	}
+	src = cpy.clone();
+}
+
 void Erace(int,void*){
 	Mat blur_img;
 	blur(src_img,blur_img,Size(blur_size+1,blur_size+1));
@@ -49,6 +110,7 @@ void Erace(int,void*){
 		}
 	}
 	cout<<cnt<<endl;
+    bigFix(blur_img);
 	imshow("dst_img",blur_img);
 }
 
