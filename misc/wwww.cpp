@@ -12,6 +12,7 @@
 #include <vector>
 #include <cmath>
 #include <queue>
+#include <ctime>
 #include <cassert>
 #define ___ROUND(x) ((int)(x+0.5))
 
@@ -87,9 +88,9 @@ void CannyFix(cv::Mat &src){
 
 bool isProbableConnecting(const cv::Mat &edgeData,const cv::Point &a,const cv::Point &b,const double &ra,const double &rb){
 	if( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) < 1e-3 ) return true; // for same petals
-	if( fabs(ra-rb) / (rb) > 0.1) return false;
+	if( fabs(ra-rb) / (rb) > 0.3) return false;
 	//std::cout <<  sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) - ra - rb  << std::endl;
-	if( sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) ) - ra - rb > 3*std::min(ra,rb) ) return false;
+	//if( sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) ) - ra - rb > 3*std::min(ra,rb) ) return false;
 	double dx = ( b.x - a.x );
 	double dy = ( b.y - a.y );
 	int loopCounter;
@@ -141,16 +142,43 @@ bool isProbableConnecting(const cv::Mat &edgeData,const cv::Point &a,const cv::P
 // O(n^2) n := number of petals.
 std::vector< std::vector<cv::Point> > clustering(const cv::Mat &edgeData,const std::vector<cv::Point> &petals,const std::vector<double> &radiuses){
 	std::vector< std::vector<cv::Point> > answer;
+	std::vector< std::vector<double> > answer_r;
+	
+	
 	std::vector<bool> used(petals.size(),false);
 	for(int i = 0 ; i < petals.size() ; i++){
 		if( used[i] ) continue;
 		used[i] = true;
 		answer.push_back(std::vector<cv::Point>());
+		answer_r.push_back(std::vector<double>());
 		answer.back().push_back(petals[i]);
+		answer_r.back().push_back(radiuses[i]);
+		
 		for(int j = i + 1 ; j < petals.size() ; j++){
 			if( used[j] ) continue;
-			if( isProbableConnecting(edgeData,petals[i],petals[j],radiuses[i],radiuses[j]) ){
+			int ps = answer.back().size();
+			bool flag = true;
+			double minDist = 1e9, maxDist = -1e9;
+			
+			for(int k = 0 ; k < answer.back().size() ; k++){
+				if( !isProbableConnecting(edgeData,answer.back()[k],petals[j],answer_r.back()[k],radiuses[j]) ){
+					flag = false;
+					break;
+				}
+				double ra = answer_r.back()[k];
+				double rb = radiuses[j];
+				cv::Point a = answer.back()[k];
+				cv::Point b = petals[j];
+				
+				minDist = std::min(minDist,sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) ) - ra - rb);
+				maxDist = std::max(maxDist,sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) ) - ra - rb);
+				
+			}
+			bool flag2 = maxDist < 4*answer_r.back()[0] && minDist < 2.5*answer_r.back()[0];
+			if( flag && flag2){
 				answer.back().push_back(petals[j]);
+				answer_r.back().push_back(radiuses[j]);
+		
 				used[j] = true;
 				if( answer.back().size() >= 6 ) break;
 			}
@@ -163,7 +191,7 @@ std::vector< std::vector<cv::Point> > clustering(const cv::Mat &edgeData,const s
 
 int main(int argc, char *argv[])
 {
-	srand(100);
+	srand(time(NULL));
 	cv::Mat src_img = cv::imread("img/sample.jpg", 1);
 	if(!src_img.data) return -1;
 
@@ -228,7 +256,15 @@ int main(int argc, char *argv[])
 		}
 		radiuses.push_back(sqrt(rad));
 		middles.push_back(cv::Point(x,y));
-	
+	}
+	// sort 
+	for(int i =0 ; i < middles.size() ; i++){
+		for(int j = 1 ; j < middles.size() ; j++){
+			if( middles[j-1].x > middles[j].x ){
+				std::swap(middles[j-1],middles[j]);
+				std::swap(radiuses[j-1],radiuses[j]);
+			}
+		}
 	}
 	std::cout << middles.size() << std::endl;
 	//std::cout << dx << " " << dy << " " << " " << loopCounter << " [" << edgeData.channels() << std::endl;
@@ -246,6 +282,11 @@ int main(int argc, char *argv[])
 		cv::Scalar s = cv::Scalar(rand()%256,rand()%256,rand()%256);
 		for(int j = 0 ; j < vp[i].size() ; j++){
 			cv::circle(src_img, vp[i][j], 2, s, 3, 4);
+		}
+		for(int j = 0 ; j < vp[i].size() ; j++){
+			for(int k = j+1 ; k < vp[i].size() ; k++){
+				cv::line(src_img, vp[i][j], vp[i][k], s, 1);
+			}
 		}
 		
 	}
