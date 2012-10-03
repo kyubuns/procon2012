@@ -70,12 +70,18 @@ void bigFix(cv::Mat &src){
 	src = cpy.clone();
 }
 
+int _gl_clicked_background_x;  // Erase() de tukau
+int _gl_clicked_background_y;  // Erase() de tukau
+
 void Erase(int,void*){
 	Mat dst_img;
 	blur(src_img,dst_img,Size(blur_size+1,blur_size+1));
 	queue<int> Q;
 	vector<bool> done(GetMatMaxSize(dst_img));
-	Q.push(GetMatIdx(dst_img,300,10));done[GetMatIdx(dst_img,300,10)]=1;//初期位置。クリックで決定？
+	int sIdx = GetMatIdx(dst_img,_gl_clicked_background_y,_gl_clicked_background_x);
+	//cout << _gl_clicked_background_x <<","<< _gl_clicked_background_y<< ": " << sIdx << endl;
+	
+	Q.push(sIdx);done[sIdx]=1;//初期位置。クリックで決定？
 	int step=dst_img.cols*dst_img.channels();
 	int dq[]={-dst_img.channels(),dst_img.channels(),step,-step},cnt=0;
 	while(Q.size()){
@@ -95,12 +101,30 @@ void Erase(int,void*){
 		}
 	}
 	bigFix(dst_img);
-  erasebg_img = dst_img;
+	erasebg_img = dst_img;
+	cv::circle(erasebg_img,cv::Point(_gl_clicked_background_x,_gl_clicked_background_y),5,cv::Scalar(0,255,0),1);
 	imshow("dst_img",erasebg_img);
+}
+
+void MouseClick( int event, int x, int y, int flags ,void *param = NULL) // コールバック関数
+{
+        switch(event)
+        {
+                case CV_EVENT_LBUTTONDOWN:
+					_gl_clicked_background_x = x;
+					_gl_clicked_background_y = y;
+					Erase(0,0);
+                break;
+
+                default:
+                break;
+        }
+
 }
 
 int erase_main(){
 	namedWindow("dst_img",WINDOW_AUTOSIZE);
+	cvSetMouseCallback("dst_img", MouseClick);
 	createTrackbar("Size-1;","dst_img",&blur_size,max_blur,Erase);
 	createTrackbar("Near:","dst_img",&AcDif,max_diff,Erase);
 	Erase(0,0);
