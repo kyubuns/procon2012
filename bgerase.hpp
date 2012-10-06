@@ -29,7 +29,6 @@ void bigFix(cv::Mat &src){
 	cv::Mat cpy = src.clone();
 	int ch = src.channels();
 	int step = ch * src.cols;
-	cout << ch << endl;
 	rep(i,src.rows)rep(j,src.cols){
 		int idx=i*step+j*ch;
 		if( haveColor(src,idx) ){
