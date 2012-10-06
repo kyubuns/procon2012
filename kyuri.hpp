@@ -12,8 +12,10 @@
 
 
 #include <vector>
+#include <map>
 #include <cmath>
 #include <queue>
+#include <sstream>
 #include <ctime>
 #include <cassert>
 #define ___ROUND(x) ((int)(x+0.5))
@@ -43,8 +45,8 @@ class kyuri {
 
         double x = box.center.x;
         double y = box.center.y;
-        if(box.size.width < 5 || box.size.height < 5) continue;
-        if(box.size.width > 50 || box.size.height > 50) continue;
+        //if(box.size.width < 5 || box.size.height < 5) continue;
+        //if(box.size.width > 50 || box.size.height > 50) continue;
 
         //背景か確認
         int index = GetMatIdx(erasebg_img, static_cast<int>(y), static_cast<int>(x));
@@ -64,8 +66,26 @@ class kyuri {
         middles.push_back(cv::Point(x,y));
 
         //=====================================test
-      }
-      // sort 
+	}
+	
+	// sort 
+	std::vector<bool> dead(middles.size());
+	std::vector<cv::Point> tmp;
+	std::vector<double> rtmp;
+	for(int i =0 ; i < middles.size() ; i++){
+		if( !dead[i] ){
+				for(int j = i + 1 ; j < middles.size() ; j++){
+					if( (middles[i].x-middles[j].x)*(middles[i].x-middles[j].x)  + (middles[i].y-middles[j].y)*(middles[i].y-middles[j].y) < std::max(radiuses[i],radiuses[j])*std::max(radiuses[i],radiuses[j]) ){
+						dead[j] = true;
+					}
+				}
+				tmp.push_back(middles[i]);
+				rtmp.push_back(radiuses[i]);
+		}
+	}
+	middles = tmp;
+	radiuses = rtmp;	
+	
       for(int i =0 ; i < middles.size() ; i++){
         for(int j = 1 ; j < middles.size() ; j++){
           if( middles[j-1].x > middles[j].x ){
@@ -73,7 +93,10 @@ class kyuri {
             std::swap(radiuses[j-1],radiuses[j]);
           }
         }
-      }
+	}
+	std::map< std::pair<int,int>  , int > num;
+		
+	for(int i = 0 ; i < middles.size() ; i++) num[std::make_pair(middles[i].x,middles[i].y)] = i;
       //std::cout << dx << " " << dy << " " << " " << loopCounter << " [" << edgeData.channels() << std::endl;
       std::vector< std::vector<cv::Point> > vp = clustering(canny_img,middles,radiuses);
 
@@ -83,7 +106,10 @@ class kyuri {
       for(int i = 0 ; i < vp.size() ; i++){
         cv::Scalar s = cv::Scalar(rand()%256,rand()%256,rand()%256);
         for(int j = 0 ; j < vp[i].size() ; j++){
-          cv::circle(src_img, vp[i][j], 2, s, 3, 4);
+			cv::circle(src_img, vp[i][j], 2, s, 3, 4);
+			std::stringstream tmp;
+			tmp << num[std::make_pair(vp[i][j].x,vp[i][j].y)];
+			cv::putText(src_img, tmp.str().c_str(), vp[i][j], cv::FONT_HERSHEY_SIMPLEX, 0.3,cv::Scalar(0,0,0), 1, CV_AA);
         }
         for(int j = 0 ; j < vp[i].size() ; j++){
           for(int k = j+1 ; k < vp[i].size() ; k++){
@@ -166,7 +192,7 @@ class kyuri {
     }
 
     static bool isProbableConnecting(const cv::Mat &edgeData,const cv::Point &a,const cv::Point &b,const double &ra,const double &rb){
-      if( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) < 1e-3 ) return true; // for same petals
+      if( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) < 1e-3 ) return false; // for same petals
       if( fabs(ra-rb) / (rb) > 0.3) return false;
       //std::cout <<  sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) - ra - rb  << std::endl;
       //if( sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) ) - ra - rb > 3*std::min(ra,rb) ) return false;
@@ -219,7 +245,16 @@ class kyuri {
       return true;
     }
     // O(n^2) n := number of petals.
-    static std::vector< std::vector<cv::Point> > clustering(const cv::Mat &edgeData,const std::vector<cv::Point> &petals,const std::vector<double> &radiuses){
+	static std::vector< std::vector<cv::Point> > clustering(const cv::Mat &edgeData,const std::vector<cv::Point> &petals,const std::vector<double> &radiuses){
+		/*std::cout << "*  "<<isProbableConnecting(edgeData,petals[92],petals[94],radiuses[92],radiuses[94]) << std::endl;
+		std::cout << "*  "<<isProbableConnecting(edgeData,petals[96],petals[94],radiuses[96],radiuses[94]) << std::endl;
+		std::cout << "*  "<<isProbableConnecting(edgeData,petals[96],petals[92],radiuses[96],radiuses[92]) << std::endl;
+		std::cout << "*  "<<isProbableConnecting(edgeData,petals[98],petals[92],radiuses[98],radiuses[92]) << std::endl;
+		std::cout << "*  "<<isProbableConnecting(edgeData,petals[98],petals[96],radiuses[98],radiuses[96]) << std::endl;
+		std::cout << "*  "<<isProbableConnecting(edgeData,petals[98],petals[94],radiuses[98],radiuses[94]) << std::endl;
+		std::cout << "*  "<<isProbableConnecting(edgeData,petals[12],petals[23],radiuses[12],radiuses[23]) << std::endl;
+		std::cout << "*  "<<isProbableConnecting(edgeData,petals[12],petals[23],radiuses[12],radiuses[23]) << std::endl;
+		*/
       std::vector< std::vector<cv::Point> > answer;
       std::vector< std::vector<double> > answer_r;
 
@@ -251,9 +286,9 @@ class kyuri {
 
             minDist = std::min(minDist,sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) ) - ra - rb);
             maxDist = std::max(maxDist,sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) ) - ra - rb);
-
-          }
-          bool flag2 = maxDist < 4*answer_r.back()[0] && minDist < 2.5*answer_r.back()[0];
+		}
+			
+          bool flag2 = maxDist < 6*answer_r.back()[0] && minDist < 4.5*answer_r.back()[0];
           if( flag && flag2){
             answer.back().push_back(petals[j]);
             answer_r.back().push_back(radiuses[j]);
