@@ -9,7 +9,7 @@ enum size {
   large
 };
 
-void calc(int s_, int m_, int l_, int total_weight) {
+void calc(const int s_, const int m_, const int l_, const int total_weight) {
   const double weight[3] = { 0.274, 1.35, 5.902 };
   int raito[3] = { s_, m_, l_ };
   double raito_total = raito[small] * weight[small] + raito[medium] * weight[medium] + raito[large] * weight[large];
@@ -17,10 +17,17 @@ void calc(int s_, int m_, int l_, int total_weight) {
     std::cout << "raito_total == 0" << std::endl;
     return;
   }
-  int s = static_cast<int>(raito[small]*(total_weight/raito_total)+0.5) ;
-  int m = static_cast<int>(raito[medium]*(total_weight/raito_total)+0.5);
-  int l = static_cast<int>(raito[large]*(total_weight/raito_total)+0.5) ;
+  double s = static_cast<double>(raito[small]*(total_weight/raito_total)+0.5) ;
+  double m = static_cast<double>(raito[medium]*(total_weight/raito_total)+0.5);
+  double l = static_cast<double>(raito[large]*(total_weight/raito_total)+0.5) ;
   double t = s * weight[small] + m * weight[medium] + l * weight[large];
+  if(total_weight > t) {
+    s += (total_weight - t)/weight[0];
+    if(s<0) s=0;
+    if(m<0) m=0;
+    if(l<0) l=0;
+    t = s * weight[small] + m * weight[medium] + l * weight[large];
+  }
   std::cout << "---result---" << std::endl;
   std::cout << "small:  " << s << " (" << s_ << ")" << std::endl;
   std::cout << "medium: " << m << " (" << m_ << ")" << std::endl;
