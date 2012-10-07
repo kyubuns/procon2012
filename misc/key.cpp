@@ -55,6 +55,7 @@ int main (int argc, char *argv[]) {
     else if(key == 'f') weight-=10;
     else if(key == 'b') weight+=1;
     else if(key == 'g') weight-=1;
+    else if(key == 27/*esc*/) break;
     calc(a[small], a[medium], a[large], weight);
   }
   return 0;
