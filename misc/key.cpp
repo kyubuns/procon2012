@@ -17,21 +17,21 @@ void calc(const int s_, const int m_, const int l_, const int total_weight) {
     std::cout << "raito_total == 0" << std::endl;
     return;
   }
-  double s = static_cast<double>(raito[small]*(total_weight/raito_total)+0.5) ;
-  double m = static_cast<double>(raito[medium]*(total_weight/raito_total)+0.5);
-  double l = static_cast<double>(raito[large]*(total_weight/raito_total)+0.5) ;
+  int s = static_cast<int>(raito[small]*(total_weight/raito_total)+0.5) ;
+  int m = static_cast<int>(raito[medium]*(total_weight/raito_total)+0.5);
+  int l = static_cast<int>(raito[large]*(total_weight/raito_total)+0.5) ;
   double t = s * weight[small] + m * weight[medium] + l * weight[large];
   if(total_weight > t) {
     s += (total_weight - t)/weight[0];
     if(s<0) s=0;
     if(m<0) m=0;
     if(l<0) l=0;
-    t = s * weight[small] + m * weight[medium] + l * weight[large];
   }
+  t = s * weight[small] + m * weight[medium] + l * weight[large];
   std::cout << "---result---" << std::endl;
-  std::cout << "small:  " << s << " (" << s_ << ")" << std::endl;
-  std::cout << "medium: " << m << " (" << m_ << ")" << std::endl;
-  std::cout << "large:  " << l << " (" << l_ << ")" << std::endl;
+  std::cout << "small:  " << static_cast<int>(s) << " (" << s_ << ")" << std::endl;
+  std::cout << "medium: " << static_cast<int>(m) << " (" << m_ << ")" << std::endl;
+  std::cout << "large:  " << static_cast<int>(l) << " (" << l_ << ")" << std::endl;
   std::cout << "  total:" << t << "g" << " (" << total_weight << ")" << std::endl;
   std::cout << std::endl;
 }
