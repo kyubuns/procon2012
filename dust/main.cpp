@@ -47,7 +47,7 @@ cv::Mat color_canny(cv::Mat src_img, int val) {
   using namespace cv;
   int ratio=3,karnel_size=3;
 	Mat mid_img = src_img.clone(),canny_img;
-	blur(src_img,mid_img,Size(3,3));
+	GaussianBlur(src_img,mid_img,Size(3,3),2,2);
 	Canny(mid_img,mid_img,val,val*ratio,karnel_size);
   return mid_img;
 }
@@ -58,7 +58,7 @@ int main(int argc,char** argv) {
   src_img = loadImage(argv[1]);
 
   cvtColor(src_img,gray_img,CV_BGR2GRAY);
-  blur(gray_img,gray_img,Size(3,3));
+  GaussianBlur(gray_img,gray_img,Size(3,3),2,2);
 
   namedWindow("Contours",CV_WINDOW_AUTOSIZE);
   imshow("Contours",src_img);
