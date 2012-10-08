@@ -13,13 +13,11 @@ int main(int, char**) {
   for(;;)
   {
     Mat frame;
-    cap >> frame; // カメラから新しいフレームを取得
-    //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
-    //Canny(edges, edges, 0, 30, 3);
-    //imshow("edges", frame);
-    imwrite("test.png", frame);
+    cap >> frame;
+    Mat dst_img(frame.rows/3, frame.cols/3, frame.type());
+    resize(frame, dst_img, dst_img.size(), cv::INTER_LANCZOS4);
+    imwrite("test.png", dst_img);
     break;
   }
-  // VideoCapture デストラクタにより，カメラは自動的に終了処理されます
   return 0;
 }

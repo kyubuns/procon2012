@@ -8,6 +8,7 @@
 using namespace std;
 using namespace cv;
 
+const int src_width = 1024;
 double src_to_roi = 4.0;  //src_img -> roi_imtの拡大率
 double roi_to_cnt = 5.0;  //roi_img -> cnt_imtの拡大率
 int div_x = 5;            //count_imgの分割数
@@ -78,6 +79,7 @@ void show_count_window(int &count, double &line_) {
     if(cnt>10) cnt=1;
   }
 
+  namedWindow("roi",CV_WINDOW_NORMAL|CV_GUI_EXPANDED);
   imshow("roi", show_img);
 
 
@@ -148,10 +150,15 @@ void calc(const int s_, const int m_, const int l_, const int total_weight) {
 }
 
 int main(int argc, char *argv[]) {
-  src_img = imread(argv[1]);
-  if(src_img.empty()) return -1;
-  game_img = imread("misc/img/nidera.jpg");
-  namedWindow("source",WINDOW_AUTOSIZE);
+  Mat tmp_img = imread(argv[1]);
+  if(tmp_img.empty()) return -1;
+  //いい感じに拡大/縮小する
+  double t = static_cast<double>(src_width)/tmp_img.cols;
+  cout << t << endl;
+  src_img = Mat(tmp_img.rows*t, tmp_img.cols*t, tmp_img.type());
+  cv::resize(tmp_img, src_img, src_img.size(), cv::INTER_LANCZOS4);
+  //game_img = imread("misc/img/nidera.jpg");
+  namedWindow("source",CV_WINDOW_NORMAL|CV_WINDOW_KEEPRATIO|CV_GUI_EXPANDED);
   imshow("source", src_img);
   setMouseCallback("source", src_mouse_callback, 0);
 
