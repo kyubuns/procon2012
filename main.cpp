@@ -8,10 +8,15 @@
 using namespace std;
 using namespace cv;
 
-const double src_to_roi = 4.0;  //src_img -> roi_imtの拡大率
-const double roi_to_cnt = 5.0;  //roi_img -> cnt_imtの拡大率
-const int div_x = 5;            //count_imgの分割数
-const int div_y = 4;            //count_imgの分割数
+double src_to_roi = 4.0;  //src_img -> roi_imtの拡大率
+double roi_to_cnt = 5.0;  //roi_img -> cnt_imtの拡大率
+int div_x = 5;            //count_imgの分割数
+int div_y = 4;            //count_imgの分割数
+int weight = 100;
+
+const std::string msg_small  = "s";
+const std::string msg_medium = "m";
+const std::string msg_large  = "l";
 
 enum size {
   small,
@@ -20,11 +25,13 @@ enum size {
 };
 
 int a[3] = {0};
-double speed = 1.5;
+double speed = 0;
 Mat src_img;
 Mat roi_img;
+Mat game_img;
 Point begin_point;
 
+inline int GetMatIdx(Mat img, int y, int x) {return y*img.cols*img.channels()+x*img.channels();}
 std::vector<std::pair<int, std::string>> memo;
 
 string itos(int i) {
@@ -32,6 +39,7 @@ string itos(int i) {
   s << i ;
   return s.str();
 }
+
 string dtos(double i) {
   char a[256];
   sprintf(a, "%.2f", i);
@@ -51,10 +59,11 @@ void show_count_window(int &count, double &line_) {
 
   //score
   cv::Scalar score_color(255,0,0);
+  double score_size = 0.5;
   cv::putText(show_img, "HI-SPEED "+dtos(speed), cv::Point(50,30), cv::FONT_HERSHEY_SIMPLEX, 0.6, score_color, 1, CV_AA);
-  cv::putText(show_img, "large:"+itos(a[large]), cv::Point(50,50), cv::FONT_HERSHEY_SIMPLEX, 0.5, score_color, 1, CV_AA);
-  cv::putText(show_img, "medium:"+itos(a[medium]), cv::Point(50,70), cv::FONT_HERSHEY_SIMPLEX, 0.5, score_color, 1, CV_AA);
-  cv::putText(show_img, "small:"+itos(a[small]), cv::Point(50,90), cv::FONT_HERSHEY_SIMPLEX, 0.5, score_color, 1, CV_AA);
+  cv::putText(show_img, "large:"+itos(a[large]), cv::Point(50,50), cv::FONT_HERSHEY_SIMPLEX, score_size, score_color, 1, CV_AA);
+  cv::putText(show_img, "medium:"+itos(a[medium]), cv::Point(50,70), cv::FONT_HERSHEY_SIMPLEX, score_size, score_color, 1, CV_AA);
+  cv::putText(show_img, "small:"+itos(a[small]), cv::Point(50,90), cv::FONT_HERSHEY_SIMPLEX, score_size, score_color, 1, CV_AA);
 
   //memo
   int cnt = 1;
@@ -62,15 +71,33 @@ void show_count_window(int &count, double &line_) {
     int pos = tmp.first;
     std::string &msg = tmp.second;
     cv::Scalar color;
-    if(msg=="small")  color = cv::Scalar(50,150,50);
-    if(msg=="medium") color = cv::Scalar(150,50,50);
-    if(msg=="large")  color = cv::Scalar(50,50,150);
+    if(msg==msg_small) color = cv::Scalar(50,150,50);
+    if(msg==msg_medium) color = cv::Scalar(150,50,50);
+    if(msg==msg_large) color = cv::Scalar(50,50,150);
     cv::putText(show_img, msg, cv::Point(x*width+pos, y*height+10*cnt), cv::FONT_HERSHEY_SIMPLEX, 0.3, color, 1, CV_AA);
-    cnt++;
     if(cnt>10) cnt=1;
   }
 
   imshow("roi", show_img);
+
+
+  //=============================================
+  /*
+  Point p1(428, 52);
+  Point p2(1201, 633);
+  Mat tmp_img(p2.y-p1.y, p2.x-p1.x, show_img.type());
+  cv::resize(show_img, tmp_img, tmp_img.size(), cv::INTER_LANCZOS4);
+  imshow("tmp", tmp_img);
+
+  for( int y = 0 ; y < tmp_img.rows; ++y ) {
+    for( int x = 0 ; x < tmp_img.cols; ++x ) {
+      game_img.data[GetMatIdx(game_img,y+p1.y,x+p1.x)] = tmp_img.data[GetMatIdx(tmp_img,y,x)];
+      game_img.data[GetMatIdx(game_img,y+p1.y,x+p1.x)+1] = tmp_img.data[GetMatIdx(tmp_img,y,x)+1];
+      game_img.data[GetMatIdx(game_img,y+p1.y,x+p1.x)+2] = tmp_img.data[GetMatIdx(tmp_img,y,x)+2];
+    }
+  }
+  imshow("nidera", game_img);
+  */
 }
 
 void src_mouse_callback(int event, int x, int y, int flag ,void*) {
@@ -123,33 +150,46 @@ void calc(const int s_, const int m_, const int l_, const int total_weight) {
 int main(int argc, char *argv[]) {
   src_img = imread(argv[1]);
   if(src_img.empty()) return -1;
+  game_img = imread("misc/img/nidera.jpg");
   namedWindow("source",WINDOW_AUTOSIZE);
   imshow("source", src_img);
   setMouseCallback("source", src_mouse_callback, 0);
 
   double line = 0;
   int i = 0;
-  int weight = 100;
   while(1) {
     int key = cv::waitKey(30);
     if(roi_img.empty()) continue;
-    if(key == 'z') { a[small]++; memo.push_back(make_pair(line, "small")); }
-    else if(key == 'a') a[small]--;
-    else if(key == 'x') { a[medium]++; memo.push_back(make_pair(line, "medium")); }
-    else if(key == 's') a[medium]--;
-    else if(key == 'c') { a[large]++; memo.push_back(make_pair(line, "large")); }
-    else if(key == 'd') a[large]--;
-    else if(key == 'v') { i++; line = -20; memo.clear(); }
-    else if(key == 'f') { i--; line = -20; memo.clear(); }
-    else if(key == 'r') { i=0; line = 0; memo.clear(); a[0] = a[1] = a[2] = 0; }
-    else if(key == 'b') { speed+=0.25; }
-    else if(key == 'g') { speed-=0.25; }
-    else if(key == 27/*esc*/) break;
+    if(key == 'b') { speed+=0.1; }
+    if(key == 'g') { speed-=0.1; }
+    if(speed == 0) {
+      if(key == 'z') div_y--;
+      if(key == 'a') div_y++;
+      if(key == 'x') div_x--;
+      if(key == 's') div_x++;
+      if(key == 'r') break;
+      if(key > 0) {
+        if(div_x < 1) div_x = 1;
+        if(div_y < 1) div_y = 1;
+        i=0; line = 0; memo.clear(); a[0] = a[1] = a[2] = 0;
+      }
+    } else {
+      if(key == 'z') { a[small]++; memo.push_back(make_pair(line, msg_small)); }
+      if(key == 'a') a[small]--;
+      if(key == 'x') { a[medium]++; memo.push_back(make_pair(line, msg_medium)); }
+      if(key == 's') a[medium]--;
+      if(key == 'c') { a[large]++; memo.push_back(make_pair(line, msg_large)); }
+      if(key == 'd') a[large]--;
+      if(key == 'v') { i++; line = -20; memo.clear(); }
+      if(key == 'f') { i--; line = -20; memo.clear(); }
+      if(key == 'r') { i=0; line = 0; memo.clear(); a[0] = a[1] = a[2] = 0; }
+      if(key == 27/*esc*/) break;
+    }
 
     //画面更新
     if(i>=div_x*div_y)i=0;
     if(i<0)i=div_x*div_y-1;
-    if(speed < 0) speed = 0;
+    if(speed<0) speed=0;
     line+=speed;
     show_count_window(i,line);
 
@@ -158,3 +198,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
