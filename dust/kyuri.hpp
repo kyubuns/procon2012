@@ -30,7 +30,7 @@ class kyuri {
 
       std::vector<std::vector<cv::Point> > contours;
       cv::findContours(canny_img, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-      CannyFix(canny_img);
+     CannyFix(canny_img);
 
       cv::vector< cv::Point > middles;
       std::vector<double> radiuses;
@@ -219,7 +219,6 @@ class kyuri {
       int B = a.y > b.y ? a.y : b.y;
       int C = a.x < b.x ? a.y : b.x;
       int D = a.x > b.x ? a.y : b.x;
-
       int k = 2;
       int p = 0;
       //std::cout << std::endl;
