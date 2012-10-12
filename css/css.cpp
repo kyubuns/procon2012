@@ -4,9 +4,11 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <ctime>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace std;
 using namespace cv;
@@ -23,6 +25,7 @@ enum size {
 int weapon = large;
 std::vector<std::pair<cv::Point,int>> point;
 int a[3] = {0};
+time_t start_time;
 
 //数えるだけ
 void calc(const int s_, const int m_, const int l_, const int total_weight) {
@@ -53,6 +56,8 @@ void calc(const int s_, const int m_, const int l_, const int total_weight) {
 }
 
 void draw() {
+  //con
+  if(con_img.data == NULL) return;
   cv::Mat copy = con_img.clone();
   for(auto &tmp : point) {
     cv::Point p = tmp.first;
@@ -65,6 +70,27 @@ void draw() {
   }
   imshow("con", copy);
   calc(a[small], a[medium], a[large], 100);
+
+  //status
+  cv::Mat status = cv::Mat::zeros(cv::Size(200, 100), CV_8UC3);
+  cv::rectangle(status, cv::Point(0,0), cv::Point(200,100), cv::Scalar(255, 255, 255), -1);
+  std::string w;
+  if(weapon==small) w = "small";
+  if(weapon==medium) w = "medium";
+  if(weapon==large) w = "large";
+  cv::Scalar color(0,0,0);
+  if(weapon==small) color = cv::Scalar(255,0,0);
+  if(weapon==medium) color = cv::Scalar(0,255,0);
+  if(weapon==large) color = cv::Scalar(0,0,255);
+  cv::putText(status, w.c_str(), cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 0.8, color, 2, CV_AA);
+
+  cv::putText(status, "time: ", cv::Point(10, 80), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(0,0,0), 1, CV_AA);
+  time_t end_time;
+  std::time(&end_time);
+  time_t sec_time = std::difftime(end_time, start_time);
+  std::string mes = boost::lexical_cast<std::string>(sec_time);
+  cv::putText(status, mes.c_str(), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(0,0,0), 1, CV_AA);
+  imshow("status", status);
 }
 
 void con_mouse_callback(int event, int x, int y, int flag ,void*) {
@@ -99,6 +125,7 @@ void src_mouse_callback(int event, int x, int y, int flag ,void*) {
     imshow("con", con_img);
     setMouseCallback("con", con_mouse_callback, 0);
     point.clear();
+    std::time(&start_time);
   }
 }
 
@@ -121,18 +148,18 @@ int main(int argc, char *argv[]) {
   imshow("source", src_img);
   setMouseCallback("source", src_mouse_callback, 0);
   while(1){
-    int key = cv::waitKey();
+    int key = cv::waitKey(100);
     if(key == 'z' && point.empty() == false) {
       auto &tmp = *point.rbegin();
       cv::Point p = tmp.first;
       int k = tmp.second;
       point.pop_back();
       a[k]--;
-      draw();
     }
     if(key == '1') { weapon = large; }
     if(key == '2') { weapon = medium; }
     if(key == '3') { weapon = small; }
+    draw();
   }
 
   return 0;
