@@ -11,7 +11,7 @@ using namespace cv;
 const int src_width = 1280;
 int div_x = 5;            //count_imgの分割数
 int div_y = 4;            //count_imgの分割数
-int weight = 100;
+int weight = 0;
 
 const std::string msg_small  = "s";
 const std::string msg_medium = "m";
@@ -149,8 +149,14 @@ void calc(const int s_, const int m_, const int l_, const int total_weight) {
 }
 
 int main(int argc, char *argv[]) {
-  Mat tmp_img = imread(argv[1]);
+  if(argc!=3) {
+    std::cout << "./torikoro [weight] [imgfile]" << std::endl;
+    return 0;
+  }
+  Mat tmp_img = imread(argv[2]);
   if(tmp_img.empty()) return -1;
+  weight = atoi(argv[1]);
+
   //いい感じに拡大/縮小する
   double t = static_cast<double>(src_width)/tmp_img.cols;
   cout << t << endl;
