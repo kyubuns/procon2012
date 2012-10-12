@@ -277,8 +277,8 @@ static void projectImagefromXYZ_(Mat& image, Mat& destimage, Mat& disp, Mat& des
 	}
 }
 
-void projectImagefromXYZ(Mat& image,Mat& destimage,Mat& disp,Mat& destdisp,Mat& xyz,Mat& R,Mat& t,Mat& K,Mat& dist,bool isSub=true,Mat& mask=Mat()){
-	if(mask.empty())mask=Mat::zeros(image.size(),CV_8U);
+void projectImagefromXYZ(Mat& image,Mat& destimage,Mat& disp,Mat& destdisp,Mat& xyz,Mat& R,Mat& t,Mat& K,Mat& dist,bool isSub=true){
+	Mat mask=Mat::zeros(image.size(),CV_8U);
 	if(disp.type()==CV_8U)
 		projectImagefromXYZ_<unsigned char>(image,destimage,disp,destdisp,xyz,R,t,K,dist,mask,isSub);
 	else if(disp.type()==CV_16S)
