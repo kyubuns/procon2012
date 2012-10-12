@@ -8,9 +8,7 @@
 using namespace std;
 using namespace cv;
 
-const int src_width = 1024;
-double src_to_roi = 4.0;  //src_img -> roi_imtの拡大率
-double roi_to_cnt = 5.0;  //roi_img -> cnt_imtの拡大率
+const int src_width = 1280;
 int div_x = 5;            //count_imgの分割数
 int div_y = 4;            //count_imgの分割数
 int weight = 100;
@@ -116,6 +114,7 @@ void src_mouse_callback(int event, int x, int y, int flag ,void*) {
 
     // (x,y), (width,height)
     cv::Mat tmp_img(src_img, cv::Rect(begin_point.x, begin_point.y, x-begin_point.x, y-begin_point.y));
+    double src_to_roi = static_cast<double>(src_width)/tmp_img.cols;
     cv::Mat dst_img(tmp_img.rows*src_to_roi, tmp_img.cols*src_to_roi, tmp_img.type());
     cv::resize(tmp_img, dst_img, dst_img.size(), cv::INTER_LANCZOS4);
     roi_img = dst_img.clone();
