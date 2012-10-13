@@ -10,13 +10,14 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <sstream>
 #include <string>
+//ToDo: ポイント保持
 
 using namespace std;
 using namespace cv;
 string itos(int i) {
-  ostringstream s ;
-  s << i ;
-  return s.str() ;
+  ostringstream s;
+  s << i;
+  return s.str();
 }
 
 const int window_width = 1280;
@@ -55,7 +56,7 @@ void draw() {
     if(k==small) color = cv::Scalar(255,0,0);
     if(k==medium) color = cv::Scalar(0,255,0);
     if(k==large) color = cv::Scalar(0,0,255);
-    cv::circle(copy, p, 10, color, 3);
+    cv::circle(copy, p, 6, color, 2);
   }
   imshow("con", copy);
   calc(a[small], a[medium], a[large]);
