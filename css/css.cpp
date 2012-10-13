@@ -10,7 +10,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <sstream>
 #include <string>
-//ToDo: ポイント保持
 
 using namespace std;
 using namespace cv;
@@ -38,10 +37,17 @@ time_t start_time;
 
 //数えるだけ
 void calc(const int s_, const int m_, const int l_) {
+  static int bs = -1;
+  static int bm = -1;
+  static int bl = -1;
+  if(bs==s_&&bm==m_&&bl==l_) return;
   std::cout << "---result---" << std::endl;
   std::cout << "small:  " << s_ << std::endl;
   std::cout << "medium: " << m_ << std::endl;
   std::cout << "large:  " << l_ << std::endl;
+  bs = s_;
+  bm = m_;
+  bl = l_;
   std::cout << std::endl;
 }
 
@@ -124,7 +130,7 @@ bool load_image(const std::string &path) {
   char a[128];
   sprintf(a, "%04d", image_index);
   Mat tmp_img = imread(path + "DSC_"+std::string(a)+".jpg");
-  std::cout << path + "DSC_"+std::string(a)+".jpg" << std::endl;
+  std::cout << "load image: " << path + "DSC_"+std::string(a)+".jpg" << std::endl;
   if(tmp_img.empty()) {
     std::cout << "load image error" << std::endl;
     return false;
