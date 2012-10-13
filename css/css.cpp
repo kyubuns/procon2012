@@ -13,12 +13,11 @@
 
 using namespace std;
 using namespace cv;
-string itos( int i ) {
+string itos(int i) {
   ostringstream s ;
   s << i ;
   return s.str() ;
 }
-
 
 const int window_width = 1280;
 const int window_height = 700;
@@ -32,6 +31,7 @@ enum size {
 };
 int weapon = large;
 std::vector<std::pair<cv::Point,int>> point;
+//std::map<int,std::vector<std::pair<cv::Point,int>>> memo;
 int a[3] = {0};
 time_t start_time;
 
@@ -132,8 +132,11 @@ bool load_image(const std::string &path) {
   double t = std::min(static_cast<double>(window_width)/tmp_img.cols, static_cast<double>(window_height)/tmp_img.rows);
   src_img = Mat(tmp_img.rows*t, tmp_img.cols*t, tmp_img.type());
   cv::resize(tmp_img, src_img, src_img.size(), cv::INTER_LANCZOS4);
-  namedWindow("source",CV_WINDOW_NORMAL|CV_WINDOW_KEEPRATIO|CV_GUI_EXPANDED);
-  imshow("source", src_img);
+  //namedWindow("source",CV_WINDOW_NORMAL|CV_WINDOW_KEEPRATIO|CV_GUI_EXPANDED);
+  //imshow("source", src_img);
+  con_img = src_img;
+  imshow("con", con_img);
+  setMouseCallback("con", con_mouse_callback, 0);
   return true;
 }
 
@@ -144,7 +147,9 @@ int main(int argc, char *argv[]) {
   }
   image_index = atoi(argv[2]);
   if(load_image(argv[1]) == false) return -1;
-  setMouseCallback("source", src_mouse_callback, 0);
+  //setMouseCallback("source", src_mouse_callback, 0);
+
+
   while(1){
     int key = cv::waitKey(100);
     if(key == 'z' && point.empty() == false) {
