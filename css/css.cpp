@@ -32,7 +32,7 @@ enum size {
 };
 int weapon = large;
 std::vector<std::pair<cv::Point,int>> point;
-//std::map<int,std::vector<std::pair<cv::Point,int>>> memo;
+std::map<int,std::vector<std::pair<cv::Point,int>>> memo;
 int a[3] = {0};
 time_t start_time;
 
@@ -161,20 +161,24 @@ int main(int argc, char *argv[]) {
       a[k]--;
     }
     if(key == 'v') {
+      memo[image_index] = point;
       for(int i=0;i<1000;++i) {
         image_index++;
         if(image_index > 999) image_index = 0;
         if(load_image(argv[1]) == true) break;
       }
       point.clear();
+      point = memo[image_index];
     }
     if(key == 'c') {
+      memo[image_index] = point;
       for(int i=0;i<1000;++i) {
         image_index--;
         if(image_index < 0) image_index = 999;
         if(load_image(argv[1]) == true) break;
       }
       point.clear();
+      point = memo[image_index];
     }
     if(key == '1') { weapon = large; }
     if(key == '2') { weapon = medium; }
