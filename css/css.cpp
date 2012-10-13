@@ -15,6 +15,7 @@ using namespace cv;
 
 const int window_width = 1280;
 const int window_height = 800;
+int image_index = 0;
 cv::Mat src_img;
 cv::Mat con_img;
 enum size {
@@ -110,15 +111,14 @@ void src_mouse_callback(int event, int x, int y, int flag ,void*) {
   }
 }
 
-int main(int argc, char *argv[]) {
-  if(argc!=2) {
-    std::cout << "./css [imgfile]" << std::endl;
-    return 0;
-  }
-  Mat tmp_img = imread(argv[1]);
+bool load_image(const std::string &path) {
+  char a[128];
+  sprintf(a, "%04d", image_index);
+  Mat tmp_img = imread(path + "DSC_"+std::string(a)+".jpg");
+  std::cout << path + "DSC_"+std::string(a)+".jpg" << std::endl;
   if(tmp_img.empty()) {
-    std::cout << "ERROR: no image" << std::endl;
-    return -1;
+    std::cout << "load image error" << std::endl;
+    return false;
   }
 
   //サイズ合わせる
@@ -127,6 +127,16 @@ int main(int argc, char *argv[]) {
   cv::resize(tmp_img, src_img, src_img.size(), cv::INTER_LANCZOS4);
   namedWindow("source",CV_WINDOW_NORMAL|CV_WINDOW_KEEPRATIO|CV_GUI_EXPANDED);
   imshow("source", src_img);
+  return true;
+}
+
+int main(int argc, char *argv[]) {
+  if(argc!=3) {
+    std::cout << "./css [loaddir] [no]" << std::endl;
+    return 0;
+  }
+  image_index = boost::lexical_cast<int>(argv[2]);
+  if(load_image(argv[1]) == false) return -1;
   setMouseCallback("source", src_mouse_callback, 0);
   while(1){
     int key = cv::waitKey(100);
@@ -136,6 +146,20 @@ int main(int argc, char *argv[]) {
       int k = tmp.second;
       point.pop_back();
       a[k]--;
+    }
+    if(key == 'v') {
+      for(int i=0;i<300;++i) {
+        image_index++;
+        if(load_image(argv[1]) == true) break;
+      }
+      point.clear();
+    }
+    if(key == 'c') {
+      for(int i=0;i<300;++i) {
+        image_index--;
+        if(load_image(argv[1]) == true) break;
+      }
+      point.clear();
     }
     if(key == '1') { weapon = large; }
     if(key == '2') { weapon = medium; }
