@@ -8,13 +8,20 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <boost/lexical_cast.hpp>
+#include <sstream>
+#include <string>
 
 using namespace std;
 using namespace cv;
+string itos( int i ) {
+  ostringstream s ;
+  s << i ;
+  return s.str() ;
+}
+
 
 const int window_width = 1280;
-const int window_height = 800;
+const int window_height = 700;
 int image_index = 0;
 cv::Mat src_img;
 cv::Mat con_img;
@@ -70,7 +77,7 @@ void draw() {
   time_t end_time;
   std::time(&end_time);
   time_t sec_time = std::difftime(end_time, start_time);
-  std::string mes = boost::lexical_cast<std::string>(sec_time);
+  std::string mes = itos(sec_time);
   cv::putText(status, mes.c_str(), cv::Point(50, 80), cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(0,0,0), 1, CV_AA);
   imshow("status", status);
 }
@@ -135,7 +142,7 @@ int main(int argc, char *argv[]) {
     std::cout << "./css [loaddir] [no]" << std::endl;
     return 0;
   }
-  image_index = boost::lexical_cast<int>(argv[2]);
+  image_index = atoi(argv[2]);
   if(load_image(argv[1]) == false) return -1;
   setMouseCallback("source", src_mouse_callback, 0);
   while(1){
