@@ -150,6 +150,7 @@ int main(int argc, char *argv[]) {
   image_index = atoi(argv[2]);
   if(load_image(argv[1]) == false) return -1;
   //setMouseCallback("source", src_mouse_callback, 0);
+  std::time(&start_time);
 
 
   while(1){
