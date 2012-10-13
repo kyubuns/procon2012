@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
 		}
 		cout << "Input total_weight:";
 		if(!(cin >> total_weight))break;
-		pass_total:;
+pass_total:;
 		int a,b,c;
 		if(argc>4){
 			a=atoi(argv[2]);
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
 		}
 		cout << "Large Medium Small:";
 		cin >> a >> b >> c;
-		pass_ratio:;
+pass_ratio:;
 
 		double ra = 1.0 * a / (a+b+c);
 		double rb = 1.0 * b / (a+b+c);
@@ -74,10 +74,27 @@ int main(int argc, char *argv[]){
 		{
 			int x[3],y[3];
 
+			if(argc>6){
+				x[0]=atoi(argv[5]);
+				y[0]=atoi(argv[6]);
+				goto pass_LRange;
+			}
 			cout << "Large's range  [a,b] : "; cin >> x[0] >> y[0];
+pass_LRange:;
+			if(argc>8){
+				x[0]=atoi(argv[5]);
+				y[0]=atoi(argv[6]);
+				goto pass_MRange;
+			}
 			cout << "Medium's range [a,b] : "; cin >> x[1] >> y[1];
+pass_MRange:;
+			if(argc>10){
+				x[0]=atoi(argv[5]);
+				y[0]=atoi(argv[6]);
+				goto pass_SRange;
+			}
 			cout << "Small's range  [a,b] : "; cin >> x[2] >> y[2];
-			cout << endl;	
+pass_SRange:;
 			vector< pair< pair<double,int> , pair<int,int> > > v;
 			for(int i = 0 ; i < 10000 ; i++){
 				if( i * weight[0] > total_weight + EPS ) continue;
@@ -103,6 +120,8 @@ int main(int argc, char *argv[]){
 			}
 			sort(v.begin(),v.end());
 
+if(argc>10)break;
+
 			cout << "====[2]====" << endl;
 			for(int i =0 ; i < min<int>(20,v.size()) ; i++){
 				double wei = v[i].first.second*weight[0]+v[i].second.first*weight[1]+v[i].second.second*weight[2];
@@ -112,6 +131,7 @@ int main(int argc, char *argv[]){
 		}
 
 		cout << endl;        cout << endl;        cout << endl;
+		
 	}
 
 }
