@@ -161,15 +161,17 @@ int main(int argc, char *argv[]) {
       a[k]--;
     }
     if(key == 'v') {
-      for(int i=0;i<300;++i) {
+      for(int i=0;i<1000;++i) {
         image_index++;
+        if(image_index > 999) image_index = 0;
         if(load_image(argv[1]) == true) break;
       }
       point.clear();
     }
     if(key == 'c') {
-      for(int i=0;i<300;++i) {
+      for(int i=0;i<1000;++i) {
         image_index--;
+        if(image_index < 0) image_index = 999;
         if(load_image(argv[1]) == true) break;
       }
       point.clear();
