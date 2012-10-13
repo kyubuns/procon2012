@@ -56,6 +56,7 @@ void draw() {
     if(k==small) color = cv::Scalar(255,0,0);
     if(k==medium) color = cv::Scalar(0,255,0);
     if(k==large) color = cv::Scalar(0,0,255);
+    if(k!=weapon) continue;
     cv::circle(copy, p, 6, color, 2);
   }
   imshow("con", copy);
