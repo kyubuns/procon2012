@@ -28,30 +28,11 @@ int a[3] = {0};
 time_t start_time;
 
 //数えるだけ
-void calc(const int s_, const int m_, const int l_, const int total_weight) {
-  const double weight[3] = { 0.274, 1.35, 5.902 };
-  int raito[3] = { s_, m_, l_ };
-  double raito_total = raito[small] * weight[small] + raito[medium] * weight[medium] + raito[large] * weight[large];
-  if(raito_total == 0.0) {
-    std::cout << "raito_total == 0" << std::endl;
-    return;
-  }
-  int s = static_cast<int>(raito[small]*(total_weight/raito_total)+0.5) ;
-  int m = static_cast<int>(raito[medium]*(total_weight/raito_total)+0.5);
-  int l = static_cast<int>(raito[large]*(total_weight/raito_total)+0.5) ;
-  double t = s * weight[small] + m * weight[medium] + l * weight[large];
-  if(total_weight > t) {
-    s += (total_weight - t)/weight[0];
-    if(s<0) s=0;
-    if(m<0) m=0;
-    if(l<0) l=0;
-  }
-  t = s * weight[small] + m * weight[medium] + l * weight[large];
+void calc(const int s_, const int m_, const int l_) {
   std::cout << "---result---" << std::endl;
-  std::cout << "small:  " << static_cast<int>(s) << " (" << s_ << ")" << std::endl;
-  std::cout << "medium: " << static_cast<int>(m) << " (" << m_ << ")" << std::endl;
-  std::cout << "large:  " << static_cast<int>(l) << " (" << l_ << ")" << std::endl;
-  std::cout << "  total:" << t << "g" << " (" << total_weight << ")" << std::endl;
+  std::cout << "small:  " << s_ << std::endl;
+  std::cout << "medium: " << m_ << std::endl;
+  std::cout << "large:  " << l_ << std::endl;
   std::cout << std::endl;
 }
 
@@ -69,7 +50,7 @@ void draw() {
     cv::circle(copy, p, 10, color, 3);
   }
   imshow("con", copy);
-  calc(a[small], a[medium], a[large], 100);
+  calc(a[small], a[medium], a[large]);
 
   //status
   cv::Mat status = cv::Mat::zeros(cv::Size(200, 100), CV_8UC3);
